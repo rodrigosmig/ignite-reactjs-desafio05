@@ -1,1 +1,68 @@
-// TODO
+.logo {
+    width: 700px;
+    margin: 5rem auto 0;
+}
+.posts {
+    width: 700px;
+    margin: 4rem auto 0;
+
+    a {
+        display: block;
+        
+        & + a {
+            margin-top: 3.125rem;
+        }
+
+        &:last-of-type {
+            margin-bottom: 4rem
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: var(--white);
+        }
+    
+        h3 {
+            margin-top: 0.5rem;
+            font-size: 1.125rem;
+            font-weight: normal;
+            color: var(--gray-300);
+        }
+
+        div {
+            margin-top: 1.5rem;
+            display: flex;
+            align-items: center;
+
+            time {
+                font-size: 0.875rem;
+                color: var(--gray-100);
+            }
+
+            span {
+                font-size: 0.875rem;
+                color: var(--gray-100);
+            }
+        }
+
+        .calendarIcon {
+            color: var(--gray-100);
+            margin-right: 0.625rem;
+        }
+
+        .userIcon {
+            color: var(--gray-100);
+            margin-left: 1.875rem;
+            margin-right: 0.500rem;
+        }
+    }
+
+    button {
+        background: none;
+        border: none;
+        color: var(--pink-300);
+    }
+}
+
+

@@ -1,1 +1,69 @@
-// TODO
+.banner {
+    max-width: 1440px;
+    height: 25rem;
+    margin: auto;
+    
+        img {
+            height: 25rem;
+            margin: auto;            
+            display: block;
+            align-items: center;
+        }
+
+}
+
+.main {
+    max-width: 700px;
+    margin: auto; 
+    margin-top: 5rem;
+
+    h1 {
+        font-size: 3rem;
+        line-height: 3.630rem;
+        color: var(--white)
+    }
+
+    .timeSection {
+        margin-top: 1.562rem;
+        color: var(--gray-100);
+        display: flex;
+
+        time {
+            font-size: 0.875rem
+        }
+
+        span {
+            font-size: 0.875rem
+        }
+
+        .calendarIcon {
+            margin-right: 0.625rem;
+        }
+
+        .userIcon {
+            margin-right: 0.625rem;
+            margin-left: 1.875rem;
+        }
+
+        .clockIcon {
+            margin-right: 0.625rem;
+            margin-left: 1.875rem;
+        }
+    }
+
+    article {
+        margin-top: 4rem;
+        color: var(--gray-100);
+        display: inline-block;
+        
+        h2 {
+            font-size: 2rem;
+            color: var(--white)
+        }
+
+        p {
+            margin:1.5rem 0;
+            text-align: justify
+        }
+    }
+}
