@@ -9,9 +9,13 @@ import styles from './post.module.scss';
 import Header from '../../components/Header';
 import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
 import { useRouter } from 'next/router';
+import React from 'react';
+import Comments from '../../components/Comments';
+import Link from 'next/link';
 
 interface Post {
   first_publication_date: string | null;
+  last_publication_date: string | null;
   data: {
     title: string;
     banner: {
@@ -29,6 +33,21 @@ interface Post {
 
 interface PostProps {
   post: Post;
+  navigation: {
+    prevPost: {
+      uid: string,
+      data: {
+        title: string
+      }
+    }[],
+    nextPost: {
+      uid: string,
+      data: {
+        title: string
+      }
+    }[]
+  }
+  preview: boolean
 }
 
 interface Content {
@@ -38,7 +57,7 @@ interface Content {
   }[];
 }
 
-export default function Post({ post, }: PostProps) {
+export default function Post({ post, navigation, preview }: PostProps) {
   
   const router = useRouter()
   if (router.isFallback) {
@@ -47,10 +66,13 @@ export default function Post({ post, }: PostProps) {
 
   function calculateReadingTime(content: Content[]) {
     const text_length = content.reduce((acc, obj) => {
-      const heading = obj.heading.split(/\s/g).length
-      const body = obj.body.split(/\s/g).length
+      const heading = obj.heading.split(/\s/g).length      
+      const body = obj.body.map(body => {
+        return body.text.split(/\s/g).length
+      })
+      const body_lenght = body.reduce((acc, value) => acc + value)
 
-      return acc + (body + heading);
+      return acc + (heading + body_lenght);
     }, 0)
 
     const reading_time = Math.ceil(text_length / 200);
@@ -84,10 +106,28 @@ export default function Post({ post, }: PostProps) {
             </span>            
             <FiClock className={styles.clockIcon} />            
             <span>
-              {/* {calculateReadingTime(post.data.content)} min */}
-              4 min
+              {calculateReadingTime(post.data.content)} min
             </span>
           </div>
+
+          {post.last_publication_date !== post.first_publication_date 
+            ? <time className={styles.editTime}>
+                *editado em { format(
+                    new Date(post.last_publication_date),
+                    "dd MMM yyyy",
+                    {
+                      locale: ptBR,
+                    }
+                  )}, às { format(
+                    new Date(post.last_publication_date),
+                    "HH:mm",
+                    {
+                      locale: ptBR,
+                    }
+                  )}
+              </time>
+            : ''
+          }          
 
           {post.data.content.map(content => (
             <article>
@@ -99,6 +139,39 @@ export default function Post({ post, }: PostProps) {
               />              
             </article>
           ))}
+
+          <hr />
+
+          <section className={styles.navigation}>
+            { navigation?.prevPost.length > 0 && (
+              <div>
+                <h3>{navigation.prevPost[0].data.title}</h3>
+                <Link href={`/post/${navigation.prevPost[0].uid}`}>
+                  <a>Post anterior</a>
+                </Link>
+              </div>
+            )}
+
+            { navigation?.nextPost.length > 0 && (
+              <div>
+                <h3>{navigation.nextPost[0].data.title}</h3>
+                <Link href={`/post/${navigation.nextPost[0].uid}`}>
+                  <a>Próximo post</a>
+                </Link>
+              </div>
+            )}
+            
+          </section>
+
+          { preview && (
+            <aside>
+              <Link href="/api/exit-preview">
+                <a className={styles.preview}>Sair do modo Preview</a>
+              </Link>
+            </aside>
+          ) }
+
+          <Comments />
           
         </main>
     </>
@@ -127,22 +200,39 @@ export const getStaticPaths: GetStaticPaths = async () => {
   }
 };
 
-export const getStaticProps: GetStaticProps = async context => {
-  const {slug} = context.params
-
+export const getStaticProps: GetStaticProps = async ({
+  params,
+  preview = false,
+  previewData
+}) => {
+  const {slug} = params;
   const prismic = getPrismicClient();
-  const response = await prismic.getByUID('posts', String(slug), {});
+  const response = await prismic.getByUID('posts', String(slug), {
+    ref: previewData?.ref || null
+  });
 
-  const content = response.data.content.map(content => (
+  const prevPost = await prismic.query(
+    [Prismic.Predicates.at('document.type', 'posts')],
     {
-      heading: content.heading,
-      body: RichText.asHtml(content.body)
+      pageSize: 1,
+      after: response.id,
+      orderings: '[document.first_publication_date]'
     }
-  ))
- 
+  );
+
+  const nextPost = await prismic.query(
+    [Prismic.Predicates.at('document.type', 'posts')],
+    {
+      pageSize: 1,
+      after: response.id,
+      orderings: '[document.last_publication_date desc]'
+    }
+  )
+
   const post = {
     uid: response.uid,
     first_publication_date: response.first_publication_date,
+    last_publication_date: response.last_publication_date,
     data: {
       title: response.data.title,
       subtitle: response.data.subtitle,
@@ -156,7 +246,12 @@ export const getStaticProps: GetStaticProps = async context => {
 
   return {
     props: {
-      post
+      post,
+      navigation: {
+        prevPost: prevPost?.results,
+        nextPost: nextPost?.results
+      },
+      preview
     },
     revalidate: 60 * 30 //30 minutes
   }

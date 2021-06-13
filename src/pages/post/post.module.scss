@@ -29,7 +29,8 @@
         display: flex;
 
         time {
-            font-size: 0.875rem
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
         }
 
         span {
@@ -64,6 +65,34 @@
         p {
             margin:1.5rem 0;
             text-align: justify
+        }
+    }
+
+    .editTime {
+        font-size: .875rem;
+        color: var(--gray-100)
+    }
+
+    hr {
+        margin-top: 3.75rem;
+        opacity: 0.1;
+        border: 1px solid var(--gray-300)
+    }
+
+    .navigation {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 3rem;
+        margin-bottom: 5rem;
+
+        h3 {
+            font-size: 1.125rem;
+            color: var(--white)
+        }
+        
+        a {
+            color: var(--pink-300)
         }
     }
 }
